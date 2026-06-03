@@ -2,7 +2,6 @@
 
 class Database {
     private static $conexion;
-    private const CLAVE_MENSAJE_SESION = 'DatabaseMensajeSesion';
 
     public static function conectar() {
         if (!self::$conexion) {
@@ -16,28 +15,24 @@ class Database {
         return self::$conexion;
     }
 
-    private static function iniciarSesionSiNo() {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+    /**
+     * Establecer mensaje de sesión
+     */
+    public static function setMensajeSesion($tipo, $mensaje) {
+        $_SESSION['mensaje_tipo'] = $tipo;
+        $_SESSION['mensaje'] = $mensaje;
     }
 
-    public static function setMensajeSesion($estado, $mensaje) {
-        self::iniciarSesionSiNo();
-        $_SESSION[self::CLAVE_MENSAJE_SESION] = [
-            'estado' => $estado,
-            'mensaje' => $mensaje
-        ];
-    }
-
-    public static function obtenerMensajeSesion($limpiar = true) {
-        self::iniciarSesionSiNo();
-        $mensaje = $_SESSION[self::CLAVE_MENSAJE_SESION] ?? ['estado' => '', 'mensaje' => ''];
-
-        if ($limpiar) {
-            unset($_SESSION[self::CLAVE_MENSAJE_SESION]);
-        }
-
-        return $mensaje;
+    /**
+     * Obtener y limpiar mensaje de sesión
+     */
+    public static function obtenerMensajeSesion() {
+        $tipo = $_SESSION['mensaje_tipo'] ?? null;
+        $mensaje = $_SESSION['mensaje'] ?? null;
+        
+        unset($_SESSION['mensaje_tipo']);
+        unset($_SESSION['mensaje']);
+        
+        return ['tipo' => $tipo, 'mensaje' => $mensaje];
     }
 }

@@ -42,13 +42,13 @@ class Usuarios {
     /**
      * Registrar nuevo usuario
      */
-    public function registrar($nombre, $correo, $usuario, $clave) {
+    public function registrar($nombre, $correo, $usuario, $clave, $rol = 'cliente') {
         // Validar que el usuario no exista
         if ($this->obtenerPorUsuario($usuario) || $this->obtenerPorCorreo($correo)) {
             return false;
         }
 
-        $sql = "INSERT INTO Usuario (nombre, correo, usuario, clave) VALUES (:nombre, :correo, :usuario, :clave)";
+        $sql = "INSERT INTO Usuario (nombre, correo, usuario, clave, rol) VALUES (:nombre, :correo, :usuario, :clave, :rol)";
         $stmt = $this->db->prepare($sql);
         $claveEncriptada = password_hash($clave, PASSWORD_BCRYPT);
 
@@ -56,7 +56,8 @@ class Usuarios {
             ':nombre' => $nombre,
             ':correo' => $correo,
             ':usuario' => $usuario,
-            ':clave' => $claveEncriptada
+            ':clave' => $claveEncriptada,
+            ':rol' => $rol
         ]);
     }
 
@@ -70,7 +71,13 @@ class Usuarios {
             return false;
         }
 
+        // Intentar verificar con bcrypt (contraseñas encriptadas)
         if (password_verify($clave, $usuarioData['clave'])) {
+            return $usuarioData;
+        }
+        
+        // Si falla bcrypt, comparar como texto plano (compatibilidad con BD existente)
+        if ($clave === $usuarioData['clave']) {
             return $usuarioData;
         }
 
@@ -81,7 +88,7 @@ class Usuarios {
      * Obtener todos los usuarios
      */
     public function obtenerTodos() {
-        $sql = "SELECT id_usuario, nombre, correo, usuario, fecha_registro FROM Usuario";
+        $sql = "SELECT id_usuario, nombre, correo, usuario, rol, fecha_registro FROM Usuario";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();

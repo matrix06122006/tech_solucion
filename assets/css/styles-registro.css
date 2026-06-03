@@ -1,0 +1,129 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.registro-box {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.registro-header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 15px;
+}
+
+.registro-header h1 {
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.registro-header p {
+    color: #666;
+    font-size: 13px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #bbb;
+    font-size: 13px;
+}
+
+input:focus {
+    outline: none;
+    border: 1px solid #333;
+    background-color: #fafafa;
+}
+
+.btn-registro {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-registro:hover {
+    background-color: #555;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    border: 1px solid #ddd;
+}
+
+.alert-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ef5350;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #66bb6a;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #666;
+}
+
+.login-link a {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.password-hint {
+    font-size: 11px;
+    color: #999;
+    margin-top: 3px;
+}

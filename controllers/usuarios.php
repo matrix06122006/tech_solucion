@@ -18,14 +18,14 @@ class UsuariosController {
             $conexion = Database::conectar();
             return [
                 'estado' => 'exitoso',
-                'mensaje' => '✅ Conexión exitosa a la base de datos',
+                'mensaje' => 'Conexión exitosa a la base de datos',
                 'base_datos' => 'tech_solucionbd',
                 'host' => 'localhost'
             ];
         } catch (PDOException $e) {
             return [
                 'estado' => 'error',
-                'mensaje' => '❌ Error de conexión',
+                'mensaje' => 'Error de conexión',
                 'error' => $e->getMessage()
             ];
         }
@@ -53,6 +53,7 @@ class UsuariosController {
             $_SESSION['usuario'] = $usuarioData['usuario'];
             $_SESSION['nombre'] = $usuarioData['nombre'];
             $_SESSION['correo'] = $usuarioData['correo'];
+            $_SESSION['rol'] = $usuarioData['rol'];
             
             Database::setMensajeSesion('exitoso', 'Sesión iniciada correctamente');
             return ['estado' => 'exitoso', 'mensaje' => 'Sesión iniciada correctamente'];
