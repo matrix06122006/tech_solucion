@@ -7,8 +7,20 @@ nombre VARCHAR(100) NOT NULL,
 correo VARCHAR(100) UNIQUE,
 usuario VARCHAR(50) NOT NULL,
 clave VARCHAR(255),
-rol ENUM('administrador','cliente') NOT NULL,
+rol ENUM('administrador','cliente','empleado') NOT NULL,
 fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE if not exists Tarea(
+    id_tarea INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    id_empleado INT NULL,
+    descripcion TEXT NOT NULL,
+    tipo_tarea VARCHAR(100) NOT NULL,
+    estado ENUM('Pendiente','Asignada','En Progreso','Completada') DEFAULT 'Pendiente',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_cliente) REFERENCES Usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_empleado) REFERENCES Usuario(id_usuario) ON DELETE SET NULL
 );
 
 DELIMITER //
@@ -33,7 +45,7 @@ p_nombre,
 p_correo,
 p_usuario,
 p_clave,
-P_rol
+p_rol
 );
 
 END //
@@ -49,8 +61,16 @@ CALL sp_insertar_usuario(
 
 CALL sp_insertar_usuario(
 'Laura Torres',
-'laura@sneaker.com',
+'laura@gmail.com',
 'vendedor1',
 '1234',
+'empleado'
+);
+
+CALL sp_insertar_usuario(
+'daniel',
+'daniel@gmail.com',
+'daniel123',
+'123456mm',
 'cliente'
 );

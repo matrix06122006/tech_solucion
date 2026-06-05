@@ -3,23 +3,40 @@ require_once __DIR__ . '/../../rutas.php';
 Rutas::requiereCliente();
 
 require_once __DIR__ . '/../../models/Usuarios.php';
+require_once __DIR__ . '/../../controllers/tareas.php';
 
 $modeloUsuarios = new Usuarios();
 $usuarioActual = $modeloUsuarios->obtenerPorId($_SESSION['id_usuario']);
 
-// Procesar cerrar sesión
+$tareasController = new TareasController();
+
+$mensaje_post = null;
+$tipo_post = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirmar_tarea'])) {
+    $tarea_id = intval($_POST['tarea_id'] ?? 0);
+    if ($tarea_id) {
+        $resultado = $tareasController->actualizarEstado($tarea_id, 'Completada');
+        $mensaje_post = $resultado['mensaje'];
+        $tipo_post = $resultado['estado'];
+    }
+}
+
+$tareas_cliente = $tareasController->obtenerTareasCliente($_SESSION['id_usuario']);
+
 if (isset($_GET['logout'])) {
     Rutas::cerrarSesion();
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Cuenta - Tech Solución</title>
     <link rel="stylesheet" href="../../assets/css/styles-cliente.css">
 </head>
+
 <body>
     <div class="header">
         <div class="header-left">
@@ -80,10 +97,61 @@ if (isset($_GET['logout'])) {
             <div class="section-title">Opciones Disponibles</div>
             <div class="options-grid">
                 <button class="option-btn" onclick="alert('Funcion en desarrollo')">Ver Productos</button>
-                <button class="option-btn" onclick="alert('Funcion en desarrollo')">Mis Pedidos</button>
-                <button class="option-btn" onclick="alert('Funcion en desarrollo')">Favoritos</button>
+                <button class="option-btn" onclick="window.location.href='pedidos.php'">Mis Pedidos</button>
+                <button class="option-btn" onclick="window.location.href='solicitar_servicio.php'">Solicitar Servicio</button>
                 <button class="option-btn" onclick="alert('Funcion en desarrollo')">Contactar Soporte</button>
             </div>
+        </div>
+
+        <!-- Mis Tareas -->
+        <div class="content-section">
+            <div class="section-title">Mis Tareas</div>
+            <?php if (!empty($mensaje_post)): ?>
+                <div style="padding:8px; color: <?php echo $tipo_post === 'exitoso' ? '#27ae60' : '#c0392b'; ?>;">
+                    <?php echo htmlspecialchars($mensaje_post); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($tareas_cliente)): ?>
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Descripcion</th>
+                            <th>Estado</th>
+                            <th>Empleado</th>
+                            <th>Fecha</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($tareas_cliente as $tarea): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($tarea['id_tarea']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['tipo_tarea']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['estado']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['empleado_nombre'] ?? 'Sin asignar'); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($tarea['fecha_creacion'])); ?></td>
+                                <td>
+                                    <?php if ($tarea['estado'] !== 'Completada'): ?>
+                                        <form method="POST" style="display:inline;">
+                                            <input type="hidden" name="confirmar_tarea" value="1">
+                                            <input type="hidden" name="tarea_id" value="<?php echo htmlspecialchars($tarea['id_tarea']); ?>">
+                                            <button type="submit" class="btn-action">Confirmar completado</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span style="color:#27ae60;">Completada</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <p style="color: #999; text-align: center; padding: 20px;">No tienes solicitudes registradas.</p>
+            <?php endif; ?>
         </div>
 
         <!-- Características -->
@@ -142,4 +210,5 @@ if (isset($_GET['logout'])) {
         </div>
     </div>
 </body>
+
 </html>

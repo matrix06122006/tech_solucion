@@ -3,26 +3,31 @@ require_once __DIR__ . '/../../rutas.php';
 Rutas::requiereAdmin();
 
 require_once __DIR__ . '/../../controllers/usuarios.php';
+require_once __DIR__ . '/../../controllers/tareas.php';
 require_once __DIR__ . '/../../models/Usuarios.php';
+require_once __DIR__ . '/../../models/Tareas.php';
 
 $controller = new UsuariosController();
 $modeloUsuarios = new Usuarios();
-$usuarioActual = $modeloUsuarios->obtenerPorId($_SESSION['id_usuario']);
+$tareasController = new TareasController();
 $todosUsuarios = $modeloUsuarios->obtenerTodos();
+$tareas = $tareasController->obtenerTodasTareas();
+$pendientes = array_filter($tareas, fn($t) => $t['estado'] === 'Pendiente');
 
-// Procesar cerrar sesión
 if (isset($_GET['logout'])) {
     Rutas::cerrarSesion();
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrador - Tech Solución</title>
     <link rel="stylesheet" href="../../assets/css/styles-admin.css">
 </head>
+
 <body>
     <div class="header">
         <div class="header-left">
@@ -54,88 +59,78 @@ if (isset($_GET['logout'])) {
             </div>
         </div>
 
-        <!-- Estadísticas -->
+        <!-- Opciones de Administración -->
+        <div class="section">
+            <div class="section-title">Opciones de Administracion</div>
+            <div class="admin-menu">
+                <button class="menu-btn" onclick="window.location.href='gestionar_usu.php'">Gestionar Usuarios</button>
+                <button class="menu-btn" onclick="alert('Funcion en desarrollo')">Reportes</button>
+                <button class="menu-btn" onclick="alert('Funcion en desarrollo')">Configuracion</button>
+                <button class="menu-btn" onclick="window.location.href='asignar_tareas.php'">Asignar Tareas</button>
+            </div>
+        </div>
+
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-number"><?php echo count($todosUsuarios); ?></div>
                 <div class="stat-label">Usuarios Registrados</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">
-                    <?php 
-                    $admins = array_filter($todosUsuarios, fn($u) => $u['rol'] === 'administrador');
-                    echo count($admins); 
-                    ?>
-                </div>
+                <div class="stat-number"><?php echo count(array_filter($todosUsuarios, fn($u) => $u['rol'] === 'administrador')); ?></div>
                 <div class="stat-label">Administradores</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">
-                    <?php 
-                    $clientes = array_filter($todosUsuarios, fn($u) => $u['rol'] === 'cliente');
-                    echo count($clientes); 
-                    ?>
-                </div>
+                <div class="stat-number"><?php echo count(array_filter($todosUsuarios, fn($u) => $u['rol'] === 'empleado')); ?></div>
+                <div class="stat-label">Empleados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><?php echo count(array_filter($todosUsuarios, fn($u) => $u['rol'] === 'cliente')); ?></div>
                 <div class="stat-label">Clientes</div>
             </div>
-        </div>
-
-        <!-- Opciones de Administración -->
-        <div class="section">
-            <div class="section-title">Opciones de Administracion</div>
-            <div class="admin-menu">
-                <button class="menu-btn" onclick="alert('Funcion en desarrollo')">Gestionar Usuarios</button>
-                <button class="menu-btn" onclick="alert('Funcion en desarrollo')">Reportes</button>
-                <button class="menu-btn" onclick="alert('Funcion en desarrollo')">Configuracion</button>
-                <button class="menu-btn" onclick="alert('Funcion en desarrollo')">Mensajes</button>
+            <div class="stat-card">
+                <div class="stat-number"><?php echo count($tareas); ?></div>
+                <div class="stat-label">Solicitudes Totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><?php echo count($pendientes); ?></div>
+                <div class="stat-label">Solicitudes Pendientes</div>
             </div>
         </div>
 
-        <!-- Lista de Usuarios -->
         <div class="section">
-            <div class="section-title">Lista de Usuarios del Sistema</div>
-            <?php if (!empty($todosUsuarios)): ?>
+            <div class="section-title">Tareas recientes</div>
+            <?php if (!empty($tareas)): ?>
                 <table class="users-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Usuario</th>
-                            <th>Correo</th>
-                            <th>Rol</th>
-                            <th>Fecha Registro</th>
-                            <th>Acciones</th>
+                            <th>Cliente</th>
+                            <th>Empleado</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Descripcion</th>
+                            <th>Fecha</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($todosUsuarios as $usuario): ?>
+                        <?php foreach (array_slice($tareas, 0, 6) as $tarea): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($usuario['id_usuario']); ?></td>
-                                <td><?php echo htmlspecialchars($usuario['nombre']); ?></td>
-                                <td><?php echo htmlspecialchars($usuario['usuario']); ?></td>
-                                <td><?php echo htmlspecialchars($usuario['correo']); ?></td>
-                                <td>
-                                    <span class="badge <?php echo $usuario['rol'] === 'administrador' ? 'badge-admin' : 'badge-cliente'; ?>">
-                                        <?php echo ucfirst($usuario['rol']); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($usuario['fecha_registro'])); ?></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="btn-action btn-edit" onclick="alert('Editar usuario: ' + <?php echo $usuario['id_usuario']; ?>)">Editar</button>
-                                        <?php if ($usuario['id_usuario'] !== $_SESSION['id_usuario']): ?>
-                                            <button class="btn-action btn-delete" onclick="if(confirm('¿Eliminar usuario?')) alert('Usuario eliminado')">Eliminar</button>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
+                                <td><?php echo htmlspecialchars($tarea['id_tarea']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['cliente_nombre'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['empleado_nombre'] ?? 'Sin asignar'); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['tipo_tarea']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['estado']); ?></td>
+                                <td><?php echo htmlspecialchars($tarea['descripcion']); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($tarea['fecha_creacion'])); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
             <?php else: ?>
-                <p style="color: #999; text-align: center; padding: 20px;">No hay usuarios registrados</p>
+                <p style="color: #999; text-align: center; padding: 20px;">No hay tareas registradas aun.</p>
             <?php endif; ?>
         </div>
     </div>
 </body>
+
 </html>

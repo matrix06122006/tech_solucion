@@ -1,10 +1,16 @@
 <?php
 require_once __DIR__ . '/../../rutas.php';
+// Manejar cierre de sesión por GET antes de cualquier redirección
+if (isset($_GET['logout'])) {
+    Rutas::cerrarSesion();
+}
 
 // Si ya está autenticado, redirige a su panel
 if (Rutas::verificarAutenticacion()) {
     if (Rutas::esAdmin()) {
         header('Location: ../admin/paneladmin.php');
+    } elseif (isset($_SESSION['rol']) && $_SESSION['rol'] === 'empleado') {
+        header('Location: ../Empleado/index-empleado.php');
     } else {
         header('Location: ../cliente/indexcliente.php');
     }
@@ -33,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Ahora solo redirigimos según el rol
             if ($_SESSION['rol'] === 'administrador') {
                 header('Location: ../admin/paneladmin.php');
+            } elseif ($_SESSION['rol'] === 'empleado') {
+                header('Location: ../Empleado/index-empleado.php');
             } else {
                 header('Location: ../cliente/indexcliente.php');
             }
@@ -46,12 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tech Solución</title>
     <link rel="stylesheet" href="../../assets/css/styles-auth.css">
 </head>
+
 <body>
     <div class="container">
         <div class="login-box">
@@ -73,25 +83,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
                 <div class="form-group">
                     <label for="usuario">Usuario</label>
-                    <input 
-                        type="text" 
-                        id="usuario" 
-                        name="usuario" 
-                        required 
+                    <input
+                        type="text"
+                        id="usuario"
+                        name="usuario"
+                        required
                         placeholder="Ingresa tu usuario"
-                        autofocus
-                    >
+                        autofocus>
                 </div>
 
                 <div class="form-group">
                     <label for="clave">Contraseña</label>
-                    <input 
-                        type="password" 
-                        id="clave" 
-                        name="clave" 
-                        required 
-                        placeholder="Ingresa tu contraseña"
-                    >
+                    <input
+                        type="password"
+                        id="clave"
+                        name="clave"
+                        required
+                        placeholder="Ingresa tu contraseña">
                 </div>
 
                 <button type="submit" class="btn-login">Iniciar Sesion</button>
@@ -103,4 +111,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </body>
+
 </html>
